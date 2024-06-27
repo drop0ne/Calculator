@@ -1,5 +1,6 @@
 ﻿#include <iostream>
 #include <conio.h>  // For _getch() to get single character input without Enter key
+#define NOMINMAX  // Prevent windows.h from defining min and max macros
 #include <windows.h>  // For Windows console color control
 #include <string>
 #include <vector>

@@ -11,56 +11,6 @@
 #include <random>
 #include <algorithm>
 
-// Structures to hold data
-struct AlignedDataA {
-    int a;
-    double b;
-};
-
-struct AlignedDataB {
-    char c;
-    float d;
-};
-
-// DataManager class to manage shared data structures
-class DataManager {
-private:
-    std::shared_ptr<AlignedDataA> dataA;
-    std::shared_ptr<AlignedDataB> dataB;
-
-public:
-    DataManager()
-        : dataA(std::make_shared<AlignedDataA>()), dataB(std::make_shared<AlignedDataB>()) {
-        dataA->a = 0;
-        dataA->b = 0.0;
-        dataB->c = '\0';
-        dataB->d = 0.0f;
-    }
-
-    void setDataA(int a, double b) {
-        dataA->a = a;
-        dataA->b = b;
-    }
-
-    std::shared_ptr<AlignedDataA> getDataA() const {
-        return dataA;
-    }
-
-    void setDataB(char c, float d) {
-        dataB->c = c;
-        dataB->d = d;
-    }
-
-    std::shared_ptr<AlignedDataB> getDataB() const {
-        return dataB;
-    }
-
-    void printData() const {
-        std::cout << "DataA: a = " << dataA->a << ", b = " << dataA->b << std::endl;
-        std::cout << "DataB: c = " << dataB->c << ", d = " << dataB->d << std::endl;
-    }
-};
-
 // UserInput class to handle all user inputs
 class UserInput {
 public:
@@ -131,12 +81,7 @@ public:
 
 // ArithmeticWorker class to perform arithmetic operations
 class ArithmeticWorker {
-private:
-    std::shared_ptr<DataManager> dataManager;
-
 public:
-    ArithmeticWorker(std::shared_ptr<DataManager> dm) : dataManager(dm) {}
-
     double add(double a, double b) { return a + b; }
     double subtract(double a, double b) { return a - b; }
     double multiply(double a, double b) { return a * b; }
@@ -178,12 +123,7 @@ public:
 
 // LinearAlgebraWorker class to perform linear algebra operations
 class LinearAlgebraWorker {
-private:
-    std::shared_ptr<DataManager> dataManager;
-
 public:
-    LinearAlgebraWorker(std::shared_ptr<DataManager> dm) : dataManager(dm) {}
-
     double dotProduct(const std::vector<double>& v1, const std::vector<double>& v2) {
         if (v1.size() != v2.size()) {
             throw std::invalid_argument("Vectors must be of the same size");
@@ -214,20 +154,11 @@ public:
             SystemOutput::print(e.what(), SystemOutput::Color::Red);
         }
     }
-
-    void performLinearAlgebra() {
-        SystemOutput::print("Linear Algebra Functionality not fully implemented yet.", SystemOutput::Color::Yellow);
-    }
 };
 
 // StatisticsWorker class to perform statistical operations
 class StatisticsWorker {
-private:
-    std::shared_ptr<DataManager> dataManager;
-
 public:
-    StatisticsWorker(std::shared_ptr<DataManager> dm) : dataManager(dm) {}
-
     double mean(const std::vector<double>& data) {
         return std::accumulate(data.begin(), data.end(), 0.0) / data.size();
     }
@@ -243,20 +174,11 @@ public:
         double result = mean(data);
         SystemOutput::print("Mean Result: " + std::to_string(result), SystemOutput::Color::Cyan);
     }
-
-    void performStatistics() {
-        SystemOutput::print("Statistics Functionality not fully implemented yet.", SystemOutput::Color::Yellow);
-    }
 };
 
 // ScreenManager class to handle the different screens and formats their display output
 class ScreenManager {
-private:
-    std::shared_ptr<DataManager> dataManager;
-
 public:
-    ScreenManager(std::shared_ptr<DataManager> dm) : dataManager(dm) {}
-
     // Display the welcome screen
     void displayWelcomeScreen() {
         clearScreen();
@@ -371,7 +293,7 @@ public:
         std::cout << "Enter second number: ";
         double b = UserInput::getDouble();
 
-        ArithmeticWorker arithmeticWorker(dataManager);
+        ArithmeticWorker arithmeticWorker;
         arithmeticWorker.performArithmetic(operation, a, b);
 
         std::cout << "\n\n\nPress any key to return to main menu..." << std::endl;
@@ -379,7 +301,7 @@ public:
     }
 
     void handleLinearAlgebraInput() {
-        LinearAlgebraWorker linearAlgebraWorker(dataManager);
+        LinearAlgebraWorker linearAlgebraWorker;
         linearAlgebraWorker.performDotProduct();
 
         std::cout << "\n\n\nPress any key to return to main menu..." << std::endl;
@@ -394,7 +316,7 @@ public:
     }
 
     void handleStatisticsInput() {
-        StatisticsWorker statisticsWorker(dataManager);
+        StatisticsWorker statisticsWorker;
         statisticsWorker.performMean();
 
         std::cout << "\n\n\nPress any key to return to main menu..." << std::endl;
@@ -433,8 +355,7 @@ public:
 };
 
 int main() {
-    auto dataManager = std::make_shared<DataManager>();
-    ScreenManager screenManager(dataManager);
+    ScreenManager screenManager;
 
     screenManager.displayWelcomeScreen();
 

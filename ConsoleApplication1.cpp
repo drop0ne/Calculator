@@ -8,6 +8,12 @@
 #include <stdexcept>  // For standard exceptions
 #include <limits>  // For numeric limits
 
+// Set the console code page to UTF-8
+void setupConsole() {
+    SetConsoleOutputCP(CP_UTF8);
+    std::wcout.imbue(std::locale("en_US.UTF-8"));
+}
+
 // SystemOutput class to manage printing to the console and setting text color
 class SystemOutput {
 public:
@@ -387,6 +393,9 @@ public:
 };
 
 int main() {
+    // Set the console output code page to UTF-8
+    setupConsole();
+
     ScreenManager screenManager;
 
     screenManager.displayWelcomeScreen();

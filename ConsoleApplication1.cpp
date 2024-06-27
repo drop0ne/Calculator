@@ -7,11 +7,14 @@
 #include <numeric>
 #include <stdexcept>  // For standard exceptions
 #include <limits>  // For numeric limits
+#include <io.h>
+#include <fcntl.h>
 
 // Set the console code page to UTF-8
 void setupConsole() {
     SetConsoleOutputCP(CP_UTF8);
-    std::wcout.imbue(std::locale("en_US.UTF-8"));
+    SetConsoleCP(CP_UTF8);
+    _setmode(_fileno(stdout), _O_U8TEXT);  // Set output mode to UTF-8
 }
 
 // SystemOutput class to manage printing to the console and setting text color
@@ -35,18 +38,18 @@ public:
     }
 
     // Print a message to the console with an optional color
-    static void print(const std::string& message, Color color = Color::Default) {
+    static void print(const std::wstring& message, Color color = Color::Default) {
         setColor(color);
-        std::cout << message << std::endl;
+        std::wcout << message << std::endl;
         setColor(Color::Default);  // Reset to default color
     }
 
     // Print a fancy message to the console with an optional color
-    static void printFancy(const std::string& message, Color color = Color::Default) {
+    static void printFancy(const std::wstring& message, Color color = Color::Default) {
         setColor(color);
-        std::cout << "=============================" << std::endl;
-        std::cout << message << std::endl;
-        std::cout << "=============================" << std::endl;
+        std::wcout << L"=============================" << std::endl;
+        std::wcout << message << std::endl;
+        std::wcout << L"=============================" << std::endl;
         setColor(Color::Default);  // Reset to default color
     }
 };
@@ -60,19 +63,19 @@ public:
     }
 
     // Get a string input from the user
-    static std::string getString() {
-        std::string input;
-        std::getline(std::cin, input);
+    static std::wstring getString() {
+        std::wstring input;
+        std::getline(std::wcin, input);
         return input;
     }
 
     // Get a double input from the user with validation
     static double getDouble() {
         double input;
-        while (!(std::cin >> input)) {
-            std::cin.clear(); // clear the error flag
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // discard invalid input
-            SystemOutput::print("Invalid input. Please enter a valid number: ", SystemOutput::Color::Red);
+        while (!(std::wcin >> input)) {
+            std::wcin.clear(); // clear the error flag
+            std::wcin.ignore(std::numeric_limits<std::streamsize>::max(), L'\n'); // discard invalid input
+            SystemOutput::print(L"Invalid input. Please enter a valid number: ", SystemOutput::Color::Red);
         }
         return input;
     }
@@ -111,27 +114,27 @@ public:
         switch (operation) {
         case '1':
             result = add(a, b);
-            SystemOutput::print("Result: " + std::to_string(result), SystemOutput::Color::Cyan);
+            SystemOutput::print(L"Result: " + std::to_wstring(result), SystemOutput::Color::Cyan);
             break;
         case '2':
             result = subtract(a, b);
-            SystemOutput::print("Result: " + std::to_string(result), SystemOutput::Color::Cyan);
+            SystemOutput::print(L"Result: " + std::to_wstring(result), SystemOutput::Color::Cyan);
             break;
         case '3':
             result = multiply(a, b);
-            SystemOutput::print("Result: " + std::to_string(result), SystemOutput::Color::Cyan);
+            SystemOutput::print(L"Result: " + std::to_wstring(result), SystemOutput::Color::Cyan);
             break;
         case '4':
             try {
                 result = divide(a, b);
-                SystemOutput::print("Result: " + std::to_string(result), SystemOutput::Color::Cyan);
+                SystemOutput::print(L"Result: " + std::to_wstring(result), SystemOutput::Color::Cyan);
             }
             catch (const std::invalid_argument& e) {
-                SystemOutput::print(e.what(), SystemOutput::Color::Red);
+                SystemOutput::print(std::wstring(e.what(), e.what() + strlen(e.what())), SystemOutput::Color::Red);
             }
             break;
         default:
-            SystemOutput::print("Invalid operation.", SystemOutput::Color::Red);
+            SystemOutput::print(L"Invalid operation.", SystemOutput::Color::Red);
             break;
         }
     }
@@ -151,22 +154,22 @@ public:
 
     // Handle the dot product operation with user inputs
     void performDotProduct() {
-        SystemOutput::print("Enter the size of the vectors: ");
+        SystemOutput::print(L"Enter the size of the vectors: ");
         int size;
-        std::cin >> size;
+        std::wcin >> size;
 
-        SystemOutput::print("Enter elements of the first vector: ");
+        SystemOutput::print(L"Enter elements of the first vector: ");
         std::vector<double> v1 = UserInput::getDoubleVector(size);
 
-        SystemOutput::print("Enter elements of the second vector: ");
+        SystemOutput::print(L"Enter elements of the second vector: ");
         std::vector<double> v2 = UserInput::getDoubleVector(size);
 
         try {
             double result = dotProduct(v1, v2);
-            SystemOutput::print("Dot Product Result: " + std::to_string(result), SystemOutput::Color::Cyan);
+            SystemOutput::print(L"Dot Product Result: " + std::to_wstring(result), SystemOutput::Color::Cyan);
         }
         catch (const std::invalid_argument& e) {
-            SystemOutput::print(e.what(), SystemOutput::Color::Red);
+            SystemOutput::print(std::wstring(e.what(), e.what() + strlen(e.what())), SystemOutput::Color::Red);
         }
     }
 };
@@ -184,19 +187,19 @@ public:
 
     // Handle the mean calculation operation with user inputs
     void performMean() {
-        SystemOutput::print("Enter the size of the data set: ");
+        SystemOutput::print(L"Enter the size of the data set: ");
         int size;
-        std::cin >> size;
+        std::wcin >> size;
 
-        SystemOutput::print("Enter elements of the data set: ");
+        SystemOutput::print(L"Enter elements of the data set: ");
         std::vector<double> data = UserInput::getDoubleVector(size);
 
         try {
             double result = mean(data);
-            SystemOutput::print("Mean Result: " + std::to_string(result), SystemOutput::Color::Cyan);
+            SystemOutput::print(L"Mean Result: " + std::to_wstring(result), SystemOutput::Color::Cyan);
         }
         catch (const std::invalid_argument& e) {
-            SystemOutput::print(e.what(), SystemOutput::Color::Red);
+            SystemOutput::print(std::wstring(e.what(), e.what() + strlen(e.what())), SystemOutput::Color::Red);
         }
     }
 };
@@ -207,81 +210,81 @@ public:
     // Display the welcome screen
     void displayWelcomeScreen() {
         clearScreen();
-        SystemOutput::print("Welcome to Universal Calculator", SystemOutput::Color::Green);
-        SystemOutput::print("This program offers various mathematical functionalities including:", SystemOutput::Color::Default);
-        SystemOutput::print("1. Basic Arithmetic (Addition, Subtraction, Multiplication, Division)", SystemOutput::Color::Default);
-        SystemOutput::print("2. Linear Algebra (Vector and Matrix operations)", SystemOutput::Color::Default);
-        SystemOutput::print("3. Calculus (Differentiation and Integration)", SystemOutput::Color::Default);
-        SystemOutput::print("4. Statistics (Mean, Variance, Standard Deviation)", SystemOutput::Color::Default);
-        SystemOutput::print("5. Probability (Random Sampling)", SystemOutput::Color::Default);
-        SystemOutput::print("6. Machine Learning (Activation and Loss Functions)", SystemOutput::Color::Default);
-        std::cout << "\n\nPress any key to continue..." << std::endl;
+        SystemOutput::print(L"Welcome to Universal Calculator", SystemOutput::Color::Green);
+        SystemOutput::print(L"This program offers various mathematical functionalities including:", SystemOutput::Color::Default);
+        SystemOutput::print(L"1. Basic Arithmetic (Addition, Subtraction, Multiplication, Division)", SystemOutput::Color::Default);
+        SystemOutput::print(L"2. Linear Algebra (Vector and Matrix operations)", SystemOutput::Color::Default);
+        SystemOutput::print(L"3. Calculus (Differentiation and Integration)", SystemOutput::Color::Default);
+        SystemOutput::print(L"4. Statistics (Mean, Variance, Standard Deviation)", SystemOutput::Color::Default);
+        SystemOutput::print(L"5. Probability (Random Sampling)", SystemOutput::Color::Default);
+        SystemOutput::print(L"6. Machine Learning (Activation and Loss Functions)", SystemOutput::Color::Default);
+        std::wcout << L"\n\nPress any key to continue..." << std::endl;
         UserInput::getChar();
     }
 
     // Display the main menu
     void displayMainMenu() {
         clearScreen();
-        SystemOutput::print("Main Menu", SystemOutput::Color::Green);
-        SystemOutput::print("1. Use the calculator", SystemOutput::Color::Default);
-        SystemOutput::print("2. Show examples", SystemOutput::Color::Default);
-        SystemOutput::print("3. Exit program", SystemOutput::Color::Default);
+        SystemOutput::print(L"Main Menu", SystemOutput::Color::Green);
+        SystemOutput::print(L"1. Use the calculator", SystemOutput::Color::Default);
+        SystemOutput::print(L"2. Show examples", SystemOutput::Color::Default);
+        SystemOutput::print(L"3. Exit program", SystemOutput::Color::Default);
     }
 
     // Display the calculator menu
     void displayCalculatorMenu() {
         clearScreen();
-        SystemOutput::print("Calculator Menu", SystemOutput::Color::Green);
-        SystemOutput::print("Choose a math group:", SystemOutput::Color::Default);
-        SystemOutput::print("1. Basic Arithmetic", SystemOutput::Color::Default);
-        SystemOutput::print("2. Linear Algebra", SystemOutput::Color::Default);
-        SystemOutput::print("3. Calculus", SystemOutput::Color::Default);
-        SystemOutput::print("4. Statistics", SystemOutput::Color::Default);
-        SystemOutput::print("5. Probability", SystemOutput::Color::Default);
-        SystemOutput::print("6. Machine Learning", SystemOutput::Color::Default);
+        SystemOutput::print(L"Calculator Menu", SystemOutput::Color::Green);
+        SystemOutput::print(L"Choose a math group:", SystemOutput::Color::Default);
+        SystemOutput::print(L"1. Basic Arithmetic", SystemOutput::Color::Default);
+        SystemOutput::print(L"2. Linear Algebra", SystemOutput::Color::Default);
+        SystemOutput::print(L"3. Calculus", SystemOutput::Color::Default);
+        SystemOutput::print(L"4. Statistics", SystemOutput::Color::Default);
+        SystemOutput::print(L"5. Probability", SystemOutput::Color::Default);
+        SystemOutput::print(L"6. Machine Learning", SystemOutput::Color::Default);
     }
 
     // Display the options for arithmetic operations
     void displayArithmeticFunctions() {
-        SystemOutput::print("  Basic Arithmetic Functions:", SystemOutput::Color::Default);
-        SystemOutput::print("    1. Addition (a + b)", SystemOutput::Color::Default);
-        SystemOutput::print("    2. Subtraction (a - b)", SystemOutput::Color::Default);
-        SystemOutput::print("    3. Multiplication (a * b)", SystemOutput::Color::Default);
-        SystemOutput::print("    4. Division (a / b)", SystemOutput::Color::Default);
-        std::cout << "Choose an operation: ";
+        SystemOutput::print(L"  Basic Arithmetic Functions:", SystemOutput::Color::Default);
+        SystemOutput::print(L"    1. Addition (a + b)", SystemOutput::Color::Default);
+        SystemOutput::print(L"    2. Subtraction (a - b)", SystemOutput::Color::Default);
+        SystemOutput::print(L"    3. Multiplication (a * b)", SystemOutput::Color::Default);
+        SystemOutput::print(L"    4. Division (a / b)", SystemOutput::Color::Default);
+        std::wcout << L"Choose an operation: ";
     }
 
     // Display the options for linear algebra operations
     void displayLinearAlgebraFunctions() {
-        SystemOutput::print("  Linear Algebra Functions:", SystemOutput::Color::Default);
-        SystemOutput::print("    1. Vector Dot Product (v1 · v2)", SystemOutput::Color::Default);
+        SystemOutput::print(L"  Linear Algebra Functions:", SystemOutput::Color::Default);
+        SystemOutput::print(L"    1. Vector Dot Product (v1 · v2)", SystemOutput::Color::Default);
     }
 
     // Display the options for calculus operations
     void displayCalculusFunctions() {
-        SystemOutput::print("  Calculus Functions:", SystemOutput::Color::Default);
-        SystemOutput::print("    1. Differentiation (f'(x))", SystemOutput::Color::Default);
-        SystemOutput::print("    2. Integration (∫f(x)dx)", SystemOutput::Color::Default);
+        SystemOutput::print(L"  Calculus Functions:", SystemOutput::Color::Default);
+        SystemOutput::print(L"    1. Differentiation (f'(x))", SystemOutput::Color::Default);
+        SystemOutput::print(L"    2. Integration (∫f(x)dx)", SystemOutput::Color::Default);
     }
 
     // Display the options for statistics operations
     void displayStatisticsFunctions() {
-        SystemOutput::print("  Statistics Functions:", SystemOutput::Color::Default);
-        SystemOutput::print("    1. Mean (average)", SystemOutput::Color::Default);
+        SystemOutput::print(L"  Statistics Functions:", SystemOutput::Color::Default);
+        SystemOutput::print(L"    1. Mean (average)", SystemOutput::Color::Default);
     }
 
     // Display the options for probability operations
     void displayProbabilityFunctions() {
-        SystemOutput::print("  Probability Functions:", SystemOutput::Color::Default);
-        SystemOutput::print("    1. Random Sampling", SystemOutput::Color::Default);
+        SystemOutput::print(L"  Probability Functions:", SystemOutput::Color::Default);
+        SystemOutput::print(L"    1. Random Sampling", SystemOutput::Color::Default);
     }
 
     // Display the options for machine learning operations
     void displayMachineLearningFunctions() {
-        SystemOutput::print("  Machine Learning Functions:", SystemOutput::Color::Default);
-        SystemOutput::print("    1. ReLU (max(0, x))", SystemOutput::Color::Default);
-        SystemOutput::print("    2. Sigmoid (1 / (1 + exp(-x)))", SystemOutput::Color::Default);
-        SystemOutput::print("    3. Tanh (tanh(x))", SystemOutput::Color::Default);
+        SystemOutput::print(L"  Machine Learning Functions:", SystemOutput::Color::Default);
+        SystemOutput::print(L"    1. ReLU (max(0, x))", SystemOutput::Color::Default);
+        SystemOutput::print(L"    2. Sigmoid (1 / (1 + exp(-x)))", SystemOutput::Color::Default);
+        SystemOutput::print(L"    3. Tanh (tanh(x))", SystemOutput::Color::Default);
     }
 
     // Display the details for the chosen calculator function
@@ -313,7 +316,7 @@ public:
             handleMachineLearningInput();
             break;
         default:
-            SystemOutput::print("Invalid choice.", SystemOutput::Color::Red);
+            SystemOutput::print(L"Invalid choice.", SystemOutput::Color::Red);
             return;
         }
     }
@@ -321,15 +324,15 @@ public:
     // Handle user input for arithmetic operations
     void handleArithmeticInput() {
         char operation = UserInput::getChar();
-        std::cout << "Enter first number: ";
+        std::wcout << L"Enter first number: ";
         double a = UserInput::getDouble();
-        std::cout << "Enter second number: ";
+        std::wcout << L"Enter second number: ";
         double b = UserInput::getDouble();
 
         ArithmeticWorker arithmeticWorker;
         arithmeticWorker.performArithmetic(operation, a, b);
 
-        std::cout << "\n\n\nPress any key to return to main menu..." << std::endl;
+        std::wcout << L"\n\n\nPress any key to return to main menu..." << std::endl;
         UserInput::getChar();
     }
 
@@ -338,15 +341,15 @@ public:
         LinearAlgebraWorker linearAlgebraWorker;
         linearAlgebraWorker.performDotProduct();
 
-        std::cout << "\n\n\nPress any key to return to main menu..." << std::endl;
+        std::wcout << L"\n\n\nPress any key to return to main menu..." << std::endl;
         UserInput::getChar();
     }
 
     // Handle user input for calculus operations
     void handleCalculusInput() {
-        SystemOutput::print("Calculus functionality not implemented yet.", SystemOutput::Color::Yellow);
+        SystemOutput::print(L"Calculus functionality not implemented yet.", SystemOutput::Color::Yellow);
 
-        std::cout << "\n\n\nPress any key to return to main menu..." << std::endl;
+        std::wcout << L"\n\n\nPress any key to return to main menu..." << std::endl;
         UserInput::getChar();
     }
 
@@ -355,34 +358,34 @@ public:
         StatisticsWorker statisticsWorker;
         statisticsWorker.performMean();
 
-        std::cout << "\n\n\nPress any key to return to main menu..." << std::endl;
+        std::wcout << L"\n\n\nPress any key to return to main menu..." << std::endl;
         UserInput::getChar();
     }
 
     // Handle user input for probability operations
     void handleProbabilityInput() {
-        SystemOutput::print("Probability functionality not implemented yet.", SystemOutput::Color::Yellow);
+        SystemOutput::print(L"Probability functionality not implemented yet.", SystemOutput::Color::Yellow);
 
-        std::cout << "\n\n\nPress any key to return to main menu..." << std::endl;
+        std::wcout << L"\n\n\nPress any key to return to main menu..." << std::endl;
         UserInput::getChar();
     }
 
     // Handle user input for machine learning operations
     void handleMachineLearningInput() {
-        SystemOutput::print("Machine Learning functionality not implemented yet.", SystemOutput::Color::Yellow);
+        SystemOutput::print(L"Machine Learning functionality not implemented yet.", SystemOutput::Color::Yellow);
 
-        std::cout << "\n\n\nPress any key to return to main menu..." << std::endl;
+        std::wcout << L"\n\n\nPress any key to return to main menu..." << std::endl;
         UserInput::getChar();
     }
 
     // Display the show examples screen
     void displayShowExamplesScreen() {
         clearScreen();
-        SystemOutput::print("Examples of Calculator Usage:", SystemOutput::Color::Cyan);
-        SystemOutput::print("1. Addition: 3 + 4 = 7", SystemOutput::Color::Default);
-        SystemOutput::print("2. Differentiation: d/dx (x^2) at x = 2 is 4", SystemOutput::Color::Default);
-        SystemOutput::print("3. Mean: Average of [1, 2, 3] is 2", SystemOutput::Color::Default);
-        std::cout << "\n\nPress any key to return to main menu..." << std::endl;
+        SystemOutput::print(L"Examples of Calculator Usage:", SystemOutput::Color::Cyan);
+        SystemOutput::print(L"1. Addition: 3 + 4 = 7", SystemOutput::Color::Default);
+        SystemOutput::print(L"2. Differentiation: d/dx (x^2) at x = 2 is 4", SystemOutput::Color::Default);
+        SystemOutput::print(L"3. Mean: Average of [1, 2, 3] is 2", SystemOutput::Color::Default);
+        std::wcout << L"\n\nPress any key to return to main menu..." << std::endl;
         UserInput::getChar();
     }
 
@@ -418,7 +421,7 @@ int main() {
             running = false;
             break;
         default:
-            SystemOutput::print("Invalid choice, please try again.", SystemOutput::Color::Red);
+            SystemOutput::print(L"Invalid choice, please try again.", SystemOutput::Color::Red);
             break;
         }
     }

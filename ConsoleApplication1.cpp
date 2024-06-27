@@ -61,58 +61,6 @@ public:
     }
 };
 
-// ArithmeticWorker class to perform arithmetic operations
-class ArithmeticWorker {
-private:
-    std::shared_ptr<DataManager> dataManager;
-
-public:
-    ArithmeticWorker(std::shared_ptr<DataManager> dm) : dataManager(dm) {}
-
-    void performArithmetic() {
-        auto data = dataManager->getDataA();
-        std::cout << "Performing Arithmetic Operation: Addition" << std::endl;
-        data->a += 10;
-        data->b *= 2;
-        dataManager->setDataA(data->a, data->b);
-        dataManager->printData();
-    }
-};
-
-// LinearAlgebraWorker class to perform linear algebra operations
-class LinearAlgebraWorker {
-private:
-    std::shared_ptr<DataManager> dataManager;
-
-public:
-    LinearAlgebraWorker(std::shared_ptr<DataManager> dm) : dataManager(dm) {}
-
-    void performLinearAlgebra() {
-        auto data = dataManager->getDataB();
-        std::cout << "Performing Linear Algebra Operation: Scalar Multiplication" << std::endl;
-        data->c = 'Z';
-        data->d += 3.14f;
-        dataManager->setDataB(data->c, data->d);
-        dataManager->printData();
-    }
-};
-
-// StatisticsWorker class to perform statistical operations
-class StatisticsWorker {
-private:
-    std::shared_ptr<DataManager> dataManager;
-
-public:
-    StatisticsWorker(std::shared_ptr<DataManager> dm) : dataManager(dm) {}
-
-    void performStatistics() {
-        std::vector<double> data = { 3.5, 7.1, 5.6 }; // Example data
-        double mean = std::accumulate(data.begin(), data.end(), 0.0) / data.size();
-        std::cout << "Performing Statistics Operation: Mean Calculation" << std::endl;
-        std::cout << "Mean: " << mean << std::endl;
-    }
-};
-
 // UserInput class to handle all user inputs
 class UserInput {
 public:
@@ -165,6 +113,87 @@ public:
     }
 };
 
+// ArithmeticWorker class to perform arithmetic operations
+class ArithmeticWorker {
+private:
+    std::shared_ptr<DataManager> dataManager;
+
+public:
+    ArithmeticWorker(std::shared_ptr<DataManager> dm) : dataManager(dm) {}
+
+    double add(double a, double b) { return a + b; }
+    double subtract(double a, double b) { return a - b; }
+    double multiply(double a, double b) { return a * b; }
+    double divide(double a, double b) {
+        if (b == 0) { throw std::invalid_argument("Division by zero"); }
+        return a / b;
+    }
+
+    void performArithmetic(char operation, double a, double b) {
+        double result = 0;
+        switch (operation) {
+        case '1':
+            result = add(a, b);
+            SystemOutput::print("Result: " + std::to_string(result), SystemOutput::Color::Cyan);
+            break;
+        case '2':
+            result = subtract(a, b);
+            SystemOutput::print("Result: " + std::to_string(result), SystemOutput::Color::Cyan);
+            break;
+        case '3':
+            result = multiply(a, b);
+            SystemOutput::print("Result: " + std::to_string(result), SystemOutput::Color::Cyan);
+            break;
+        case '4':
+            try {
+                result = divide(a, b);
+                SystemOutput::print("Result: " + std::to_string(result), SystemOutput::Color::Cyan);
+            }
+            catch (const std::invalid_argument& e) {
+                SystemOutput::print(e.what(), SystemOutput::Color::Red);
+            }
+            break;
+        default:
+            SystemOutput::print("Invalid operation.", SystemOutput::Color::Red);
+            break;
+        }
+    }
+};
+
+// LinearAlgebraWorker class to perform linear algebra operations
+class LinearAlgebraWorker {
+private:
+    std::shared_ptr<DataManager> dataManager;
+
+public:
+    LinearAlgebraWorker(std::shared_ptr<DataManager> dm) : dataManager(dm) {}
+
+    void performLinearAlgebra() {
+        auto data = dataManager->getDataB();
+        std::cout << "Performing Linear Algebra Operation: Scalar Multiplication" << std::endl;
+        data->c = 'Z';
+        data->d += 3.14f;
+        dataManager->setDataB(data->c, data->d);
+        dataManager->printData();
+    }
+};
+
+// StatisticsWorker class to perform statistical operations
+class StatisticsWorker {
+private:
+    std::shared_ptr<DataManager> dataManager;
+
+public:
+    StatisticsWorker(std::shared_ptr<DataManager> dm) : dataManager(dm) {}
+
+    void performStatistics() {
+        std::vector<double> data = { 3.5, 7.1, 5.6 }; // Example data
+        double mean = std::accumulate(data.begin(), data.end(), 0.0) / data.size();
+        std::cout << "Performing Statistics Operation: Mean Calculation" << std::endl;
+        std::cout << "Mean: " << mean << std::endl;
+    }
+};
+
 // ScreenManager class to handle the different screens and formats their display output
 class ScreenManager {
 public:
@@ -211,6 +240,7 @@ public:
         SystemOutput::print("    2. Subtraction (a - b)", SystemOutput::Color::Default);
         SystemOutput::print("    3. Multiplication (a * b)", SystemOutput::Color::Default);
         SystemOutput::print("    4. Division (a / b)", SystemOutput::Color::Default);
+        std::cout << "Choose an operation: ";
     }
 
     void displayLinearAlgebraFunctions() {
@@ -249,6 +279,7 @@ public:
         switch (choice) {
         case '1':
             displayArithmeticFunctions();
+            handleArithmeticInput();
             break;
         case '2':
             displayLinearAlgebraFunctions();
@@ -269,8 +300,21 @@ public:
             SystemOutput::print("Invalid choice.", SystemOutput::Color::Red);
             return;
         }
+    }
 
-        std::cout << "\n\nResult: [Your result here]" << std::endl;
+    void handleArithmeticInput() {
+        char operation = UserInput::getChar();
+        std::cout << "Enter first number: ";
+        double a;
+        std::cin >> a;
+        std::cout << "Enter second number: ";
+        double b;
+        std::cin >> b;
+
+        auto dataManager = std::make_shared<DataManager>();
+        ArithmeticWorker arithmeticWorker(dataManager);
+        arithmeticWorker.performArithmetic(operation, a, b);
+
         std::cout << "\n\n\nPress any key to return to main menu..." << std::endl;
         UserInput::getChar();
     }

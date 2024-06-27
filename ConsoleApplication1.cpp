@@ -1,16 +1,16 @@
 #include <iostream>
-#include <string>
-#include <stack>
-#include <cctype>
-#include <sstream>
-#include <stdexcept>
+#include <cstdlib>
+#include <cmath>
+#include <vector>
 #include <functional>
+#include <stdexcept>
+#include <sstream>
 #include <map>
+#include <stack>
 
 class MathBase {
 public:
     virtual ~MathBase() = default;
-
 protected:
     double parseAndEvaluate(const std::string& expression, double x) {
         std::istringstream iss(expression);
@@ -85,7 +85,6 @@ private:
         }
         double right = values.top(); values.pop();
         double left = values.top(); values.pop();
-
         switch (op) {
         case '+': values.push(left + right); break;
         case '-': values.push(left - right); break;
@@ -95,154 +94,138 @@ private:
         }
     }
 };
-class Arithmetic : public MathBase {
+
+class WelcomeScreen {
 public:
-    double add(double a, double b) { return a + b; }
-    double subtract(double a, double b) { return a - b; }
-    double multiply(double a, double b) { return a * b; }
-    double divide(double a, double b) {
-        if (b == 0) throw std::invalid_argument("Division by zero");
-        return a / b;
-    }
-};
-class Geometry : public MathBase {
-public:
-    double areaCircle(double radius) {
-        if (radius < 0) throw std::invalid_argument("Radius cannot be negative");
-        return 3.14159265358979323846 * radius * radius;
+    void displayWelcome() {
+        clearScreen();
+        std::cout << "Welcome to the Math Application!" << std::endl;
+        std::cout << "Please select an option:" << std::endl;
+        std::cout << "1. Use the Calculator" << std::endl;
+        std::cout << "2. Show Examples of Use" << std::endl;
+        std::cout << "Enter your choice (1 or 2): ";
     }
 
-    double circumferenceCircle(double radius) {
-        if (radius < 0) throw std::invalid_argument("Radius cannot be negative");
-        return 2 * 3.14159265358979323846 * radius;
-    }
+    void handleUserChoice() {
+        int choice;
+        std::cin >> choice;
+        clearScreen();
 
-    double areaRectangle(double length, double width) {
-        if (length < 0 || width < 0) throw std::invalid_argument("Length and width cannot be negative");
-        return length * width;
-    }
-
-    double perimeterRectangle(double length, double width) {
-        if (length < 0 || width < 0) throw std::invalid_argument("Length and width cannot be negative");
-        return 2 * (length + width);
-    }
-};
-#include <cmath>
-
-class Trigonometry : public MathBase {
-public:
-    double sin(double angle) { return std::sin(angle); }
-    double cos(double angle) { return std::cos(angle); }
-    double tan(double angle) { return std::tan(angle); }
-};
-class Calculus : public MathBase {
-public:
-    double differentiate(std::function<double(double)> f, double x) {
-        double h = 1e-5;
-        return (f(x + h) - f(x)) / h;
-    }
-
-    double integrate(std::function<double(double)> f, double a, double b) {
-        if (a > b) throw std::invalid_argument("Lower limit cannot be greater than upper limit");
-        double h = 1e-5;
-        double sum = 0.0;
-        for (double x = a; x < b; x += h) {
-            sum += f(x) * h;
+        if (choice == 1) {
+            displayCalculator();
         }
-        return sum;
-    }
-};
-#include <vector>
-
-class LinearAlgebra : public MathBase {
-public:
-    std::vector<double> addVectors(const std::vector<double>& a, const std::vector<double>& b) {
-        if (a.size() != b.size()) throw std::invalid_argument("Vectors must be the same size");
-        std::vector<double> result(a.size());
-        for (size_t i = 0; i < a.size(); ++i) {
-            result[i] = a[i] + b[i];
+        else if (choice == 2) {
+            displayExamples();
         }
-        return result;
+        else {
+            std::cerr << "Invalid choice. Please restart the program." << std::endl;
+        }
     }
 
-    std::vector<double> subtractVectors(const std::vector<double>& a, const std::vector<double>& b) {
-        if (a.size() != b.size()) throw std::invalid_argument("Vectors must be the same size");
-        std::vector<double> result(a.size());
-        for (size_t i = 0; i < a.size(); ++i) {
-            result[i] = a[i] - b[i];
+private:
+    void clearScreen() {
+#ifdef _WIN32
+        system("cls");
+#else
+        system("clear");
+#endif
+    }
+
+    void displayCalculator() {
+        std::cout << "Calculator Interface" << std::endl;
+        std::cout << "Available Math Types:" << std::endl;
+        std::cout << "1. Arithmetic" << std::endl;
+        std::cout << "2. Geometry" << std::endl;
+        std::cout << "3. Trigonometry" << std::endl;
+        std::cout << "4. Calculus" << std::endl;
+        std::cout << "5. Linear Algebra" << std::endl;
+        std::cout << "Enter the number corresponding to the math type: ";
+
+        int mathType;
+        std::cin >> mathType;
+        clearScreen();
+
+        switch (mathType) {
+        case 1:
+            displayArithmeticFunctions();
+            break;
+        case 2:
+            displayGeometryFunctions();
+            break;
+        case 3:
+            displayTrigonometryFunctions();
+            break;
+        case 4:
+            displayCalculusFunctions();
+            break;
+        case 5:
+            displayLinearAlgebraFunctions();
+            break;
+        default:
+            std::cerr << "Invalid choice. Please restart the program." << std::endl;
+            break;
         }
-        return result;
+    }
+
+    void displayExamples() {
+        std::cout << "Examples of Use:" << std::endl;
+        std::cout << "1. Arithmetic: Add 5 and 3 -> add 5 3" << std::endl;
+        std::cout << "2. Geometry: Area of a circle with radius 5 -> area_circle 5" << std::endl;
+        std::cout << "3. Trigonometry: Sin of 90 degrees -> sin 1.5708" << std::endl;
+        std::cout << "4. Calculus: Differentiate x^2 at x=2 -> differentiate x^2 2" << std::endl;
+        std::cout << "5. Linear Algebra: Add vectors [1,2,3] and [4,5,6] -> add_vectors [1,2,3] [4,5,6]" << std::endl;
+    }
+
+    void displayArithmeticFunctions() {
+        std::cout << "Arithmetic Functions:" << std::endl;
+        std::cout << "1. Add" << std::endl;
+        std::cout << "2. Subtract" << std::endl;
+        std::cout << "3. Multiply" << std::endl;
+        std::cout << "4. Divide" << std::endl;
+        std::cout << "Usage: Enter the operation followed by two operands, e.g., 'add 5 3'." << std::endl;
+    }
+
+    void displayGeometryFunctions() {
+        std::cout << "Geometry Functions:" << std::endl;
+        std::cout << "1. Area of Circle" << std::endl;
+        std::cout << "2. Circumference of Circle" << std::endl;
+        std::cout << "3. Area of Rectangle" << std::endl;
+        std::cout << "4. Perimeter of Rectangle" << std::endl;
+        std::cout << "Usage: Enter the operation followed by required parameters, e.g., 'area_circle 5'." << std::endl;
+    }
+
+    void displayTrigonometryFunctions() {
+        std::cout << "Trigonometry Functions:" << std::endl;
+        std::cout << "1. Sin" << std::endl;
+        std::cout << "2. Cos" << std::endl;
+        std::cout << "3. Tan" << std::endl;
+        std::cout << "Usage: Enter the operation followed by an angle in radians, e.g., 'sin 1.5708'." << std::endl;
+    }
+
+    void displayCalculusFunctions() {
+        std::cout << "Calculus Functions:" << std::endl;
+        std::cout << "1. Differentiate" << std::endl;
+        std::cout << "2. Integrate" << std::endl;
+        std::cout << "Usage: Enter the operation followed by the function and point or range, e.g., 'differentiate x^2 2'." << std::endl;
+    }
+
+    void displayLinearAlgebraFunctions() {
+        std::cout << "Linear Algebra Functions:" << std::endl;
+        std::cout << "1. Add Vectors" << std::endl;
+        std::cout << "2. Subtract Vectors" << std::endl;
+        std::cout << "Usage: Enter the operation followed by two vectors, e.g., 'add_vectors [1,2,3] [4,5,6]'." << std::endl;
     }
 };
+
 class MathApplication {
 public:
     void run() {
-        // Example usage of each math class
-
-        // Arithmetic
-        Arithmetic arithmetic;
-        try {
-            double result = arithmetic.add(5, 3);
-            std::cout << "Addition result: " << result << std::endl;
-        }
-        catch (const std::exception& e) {
-            std::cerr << "Error: " << e.what() << std::endl;
-        }
-
-        // Geometry
-        Geometry geometry;
-        try {
-            double area = geometry.areaCircle(5);
-            std::cout << "Area of circle with radius 5: " << area << std::endl;
-
-            double perimeter = geometry.perimeterRectangle(5, 3);
-            std::cout << "Perimeter of rectangle with length 5 and width 3: " << perimeter << std::endl;
-        }
-        catch (const std::exception& e) {
-            std::cerr << "Error: " << e.what() << std::endl;
-        }
-
-        // Trigonometry
-        Trigonometry trigonometry;
-        try {
-            double sine = trigonometry.sin(3.14159265358979323846 / 2);
-            std::cout << "Sine of 90 degrees: " << sine << std::endl;
-        }
-        catch (const std::exception& e) {
-            std::cerr << "Error: " << e.what() << std::endl;
-        }
-
-        // Calculus
-        Calculus calculus;
-        try {
-            auto func = [](double x) { return x * x; }; // Example function: f(x) = x^2
-            double derivative = calculus.differentiate(func, 2);
-            std::cout << "Derivative of x^2 at x = 2: " << derivative << std::endl;
-
-            double integral = calculus.integrate(func, 0, 2);
-            std::cout << "Integral of x^2 from 0 to 2: " << integral << std::endl;
-        }
-        catch (const std::exception& e) {
-            std::cerr << "Error: " << e.what() << std::endl;
-        }
-
-        // Linear Algebra
-        LinearAlgebra linearAlgebra;
-        try {
-            std::vector<double> vec1 = { 1, 2, 3 };
-            std::vector<double> vec2 = { 4, 5, 6 };
-            auto resultVec = linearAlgebra.addVectors(vec1, vec2);
-            std::cout << "Vector addition result: ";
-            for (double val : resultVec) {
-                std::cout << val << " ";
-            }
-            std::cout << std::endl;
-        }
-        catch (const std::exception& e) {
-            std::cerr << "Error: " << e.what() << std::endl;
-        }
+        WelcomeScreen welcomeScreen;
+        welcomeScreen.displayWelcome();
+        welcomeScreen.handleUserChoice();
     }
 };
+
 int main() {
     MathApplication app;
     app.run();

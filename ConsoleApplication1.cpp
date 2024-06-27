@@ -75,6 +75,22 @@ public:
         std::getline(std::cin, input);
         return input;
     }
+
+    // Get a double input from the user
+    static double getDouble() {
+        double input;
+        std::cin >> input;
+        return input;
+    }
+
+    // Get a vector of doubles from the user
+    static std::vector<double> getDoubleVector(int size) {
+        std::vector<double> vec(size);
+        for (int i = 0; i < size; ++i) {
+            std::cin >> vec[i];
+        }
+        return vec;
+    }
 };
 
 // SystemOutput class to manage printing to the console and setting text color
@@ -168,13 +184,39 @@ private:
 public:
     LinearAlgebraWorker(std::shared_ptr<DataManager> dm) : dataManager(dm) {}
 
+    double dotProduct(const std::vector<double>& v1, const std::vector<double>& v2) {
+        if (v1.size() != v2.size()) {
+            throw std::invalid_argument("Vectors must be of the same size");
+        }
+        double result = 0;
+        for (size_t i = 0; i < v1.size(); ++i) {
+            result += v1[i] * v2[i];
+        }
+        return result;
+    }
+
+    void performDotProduct() {
+        SystemOutput::print("Enter the size of the vectors: ");
+        int size;
+        std::cin >> size;
+
+        SystemOutput::print("Enter elements of the first vector: ");
+        std::vector<double> v1 = UserInput::getDoubleVector(size);
+
+        SystemOutput::print("Enter elements of the second vector: ");
+        std::vector<double> v2 = UserInput::getDoubleVector(size);
+
+        try {
+            double result = dotProduct(v1, v2);
+            SystemOutput::print("Dot Product Result: " + std::to_string(result), SystemOutput::Color::Cyan);
+        }
+        catch (const std::invalid_argument& e) {
+            SystemOutput::print(e.what(), SystemOutput::Color::Red);
+        }
+    }
+
     void performLinearAlgebra() {
-        auto data = dataManager->getDataB();
-        std::cout << "Performing Linear Algebra Operation: Scalar Multiplication" << std::endl;
-        data->c = 'Z';
-        data->d += 3.14f;
-        dataManager->setDataB(data->c, data->d);
-        dataManager->printData();
+        SystemOutput::print("Linear Algebra Functionality not fully implemented yet.", SystemOutput::Color::Yellow);
     }
 };
 
@@ -186,17 +228,35 @@ private:
 public:
     StatisticsWorker(std::shared_ptr<DataManager> dm) : dataManager(dm) {}
 
+    double mean(const std::vector<double>& data) {
+        return std::accumulate(data.begin(), data.end(), 0.0) / data.size();
+    }
+
+    void performMean() {
+        SystemOutput::print("Enter the size of the data set: ");
+        int size;
+        std::cin >> size;
+
+        SystemOutput::print("Enter elements of the data set: ");
+        std::vector<double> data = UserInput::getDoubleVector(size);
+
+        double result = mean(data);
+        SystemOutput::print("Mean Result: " + std::to_string(result), SystemOutput::Color::Cyan);
+    }
+
     void performStatistics() {
-        std::vector<double> data = { 3.5, 7.1, 5.6 }; // Example data
-        double mean = std::accumulate(data.begin(), data.end(), 0.0) / data.size();
-        std::cout << "Performing Statistics Operation: Mean Calculation" << std::endl;
-        std::cout << "Mean: " << mean << std::endl;
+        SystemOutput::print("Statistics Functionality not fully implemented yet.", SystemOutput::Color::Yellow);
     }
 };
 
 // ScreenManager class to handle the different screens and formats their display output
 class ScreenManager {
+private:
+    std::shared_ptr<DataManager> dataManager;
+
 public:
+    ScreenManager(std::shared_ptr<DataManager> dm) : dataManager(dm) {}
+
     // Display the welcome screen
     void displayWelcomeScreen() {
         clearScreen();
@@ -246,7 +306,6 @@ public:
     void displayLinearAlgebraFunctions() {
         SystemOutput::print("  Linear Algebra Functions:", SystemOutput::Color::Default);
         SystemOutput::print("    1. Vector Dot Product (v1 · v2)", SystemOutput::Color::Default);
-        SystemOutput::print("    2. Matrix Multiplication (M1 * M2)", SystemOutput::Color::Default);
     }
 
     void displayCalculusFunctions() {
@@ -258,8 +317,6 @@ public:
     void displayStatisticsFunctions() {
         SystemOutput::print("  Statistics Functions:", SystemOutput::Color::Default);
         SystemOutput::print("    1. Mean (average)", SystemOutput::Color::Default);
-        SystemOutput::print("    2. Variance (var)", SystemOutput::Color::Default);
-        SystemOutput::print("    3. Standard Deviation (std dev)", SystemOutput::Color::Default);
     }
 
     void displayProbabilityFunctions() {
@@ -283,18 +340,23 @@ public:
             break;
         case '2':
             displayLinearAlgebraFunctions();
+            handleLinearAlgebraInput();
             break;
         case '3':
             displayCalculusFunctions();
+            handleCalculusInput();
             break;
         case '4':
             displayStatisticsFunctions();
+            handleStatisticsInput();
             break;
         case '5':
             displayProbabilityFunctions();
+            handleProbabilityInput();
             break;
         case '6':
             displayMachineLearningFunctions();
+            handleMachineLearningInput();
             break;
         default:
             SystemOutput::print("Invalid choice.", SystemOutput::Color::Red);
@@ -305,15 +367,49 @@ public:
     void handleArithmeticInput() {
         char operation = UserInput::getChar();
         std::cout << "Enter first number: ";
-        double a;
-        std::cin >> a;
+        double a = UserInput::getDouble();
         std::cout << "Enter second number: ";
-        double b;
-        std::cin >> b;
+        double b = UserInput::getDouble();
 
-        auto dataManager = std::make_shared<DataManager>();
         ArithmeticWorker arithmeticWorker(dataManager);
         arithmeticWorker.performArithmetic(operation, a, b);
+
+        std::cout << "\n\n\nPress any key to return to main menu..." << std::endl;
+        UserInput::getChar();
+    }
+
+    void handleLinearAlgebraInput() {
+        LinearAlgebraWorker linearAlgebraWorker(dataManager);
+        linearAlgebraWorker.performDotProduct();
+
+        std::cout << "\n\n\nPress any key to return to main menu..." << std::endl;
+        UserInput::getChar();
+    }
+
+    void handleCalculusInput() {
+        SystemOutput::print("Calculus functionality not implemented yet.", SystemOutput::Color::Yellow);
+
+        std::cout << "\n\n\nPress any key to return to main menu..." << std::endl;
+        UserInput::getChar();
+    }
+
+    void handleStatisticsInput() {
+        StatisticsWorker statisticsWorker(dataManager);
+        statisticsWorker.performMean();
+
+        std::cout << "\n\n\nPress any key to return to main menu..." << std::endl;
+        UserInput::getChar();
+    }
+
+    void handleProbabilityInput() {
+        SystemOutput::print("Probability functionality not implemented yet.", SystemOutput::Color::Yellow);
+
+        std::cout << "\n\n\nPress any key to return to main menu..." << std::endl;
+        UserInput::getChar();
+    }
+
+    void handleMachineLearningInput() {
+        SystemOutput::print("Machine Learning functionality not implemented yet.", SystemOutput::Color::Yellow);
 
         std::cout << "\n\n\nPress any key to return to main menu..." << std::endl;
         UserInput::getChar();
@@ -338,11 +434,8 @@ public:
 
 int main() {
     auto dataManager = std::make_shared<DataManager>();
-    ArithmeticWorker arithmeticWorker(dataManager);
-    LinearAlgebraWorker linearAlgebraWorker(dataManager);
-    StatisticsWorker statisticsWorker(dataManager);
+    ScreenManager screenManager(dataManager);
 
-    ScreenManager screenManager;
     screenManager.displayWelcomeScreen();
 
     bool running = true;

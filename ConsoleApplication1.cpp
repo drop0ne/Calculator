@@ -10,11 +10,19 @@
 #include <io.h>
 #include <fcntl.h>
 
-// Set the console code page to UTF-8
 void setupConsole() {
-    SetConsoleOutputCP(CP_UTF8);
-    SetConsoleCP(CP_UTF8);
-    _setmode(_fileno(stdout), _O_U8TEXT);  // Set output mode to UTF-8
+    if (SetConsoleOutputCP(CP_UTF8) == 0) {
+        std::cerr << "Error: Unable to set console output code page to UTF-8." << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    if (SetConsoleCP(CP_UTF8) == 0) {
+        std::cerr << "Error: Unable to set console input code page to UTF-8." << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    if (_setmode(_fileno(stdout), _O_U8TEXT) == -1) {
+        std::cerr << "Error: Unable to set console output mode to UTF-8." << std::endl;
+        exit(EXIT_FAILURE);
+    }
 }
 
 // SystemOutput class to manage printing to the console and setting text color

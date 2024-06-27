@@ -1,13 +1,86 @@
 ﻿#include <iostream>
-#include <stdexcept>
+#include <conio.h>  // For _getch() to get single character input without Enter key
+#include <windows.h>  // For Windows console color control
+#include <string>
 #include <vector>
-#include <initializer_list>
-#include <functional>
 #include <numeric>
 #include <cmath>
+#include <functional>
 #include <memory>
 #include <random>
 #include <algorithm>
+
+// UserInput class to handle all user inputs
+class UserInput {
+public:
+    // Get a single character input from the user
+    static char getChar() {
+        return _getch();
+    }
+
+    // Get a string input from the user
+    static std::string getString() {
+        std::string input;
+        std::getline(std::cin, input);
+        return input;
+    }
+};
+
+// SystemOutput class to manage printing to the console and setting text color
+class SystemOutput {
+public:
+    // Enum class for console text colors
+    enum class Color {
+        Default = 7,
+        Red = 12,
+        Green = 10,
+        Blue = 9,
+        Yellow = 14
+    };
+
+    // Set the console text color
+    static void setColor(Color color) {
+        HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+        SetConsoleTextAttribute(hConsole, static_cast<WORD>(color));
+    }
+
+    // Print a message to the console with an optional color
+    static void print(const std::string& message, Color color = Color::Default) {
+        setColor(color);
+        std::cout << message << std::endl;
+        setColor(Color::Default);  // Reset to default color
+    }
+};
+
+// ScreenManager class to handle the different screens and formats their display output
+class ScreenManager {
+public:
+    // Display the welcome screen
+    void displayWelcomeScreen() {
+        clearScreen();
+        SystemOutput::print("Welcome to Universal Calculator", SystemOutput::Color::Green);
+        SystemOutput::print("This program has the following capabilities:", SystemOutput::Color::Default);
+        SystemOutput::print("1. Use the calculator", SystemOutput::Color::Default);
+        SystemOutput::print("2. Show examples", SystemOutput::Color::Default);
+        SystemOutput::print("3. Exit program", SystemOutput::Color::Default);
+        SystemOutput::print("Press any key to continue...", SystemOutput::Color::Yellow);
+        UserInput::getChar();
+    }
+
+    // Display the main menu
+    void displayMainMenu() {
+        clearScreen();
+        SystemOutput::print("Main Menu", SystemOutput::Color::Green);
+        SystemOutput::print("1. Use the calculator", SystemOutput::Color::Default);
+        SystemOutput::print("2. Show examples", SystemOutput::Color::Default);
+        SystemOutput::print("3. Exit program", SystemOutput::Color::Default);
+    }
+
+    // Clear the console screen
+    void clearScreen() {
+        system("cls");
+    }
+};
 
 // BasicMath class for basic arithmetic operations
 class BasicMath {
@@ -132,7 +205,7 @@ public:
     }
 };
 
-// AlignedDataA and AlignedDataB structures
+// Structures to hold data
 struct AlignedDataA { int a; double b; };
 struct AlignedDataB { char c; float d; };
 
@@ -210,20 +283,31 @@ public:
 };
 
 int main() {
-    auto dataManager = std::make_shared<DataManager>();
+    ScreenManager screenManager;
+    screenManager.displayWelcomeScreen();
 
-    dataManager->setDataA(5, 10.0);
-    dataManager->setDataB('A', 1.0f);
+    bool running = true;
+    while (running) {
+        screenManager.displayMainMenu();
 
-    ArithmeticWorker arithmeticWorker(dataManager);
-    LinearAlgebraWorker linearAlgebraWorker(dataManager);
-    StatisticsWorker statisticsWorker(dataManager);
-
-    arithmeticWorker.performArithmetic();
-    linearAlgebraWorker.performLinearAlgebra();
-    statisticsWorker.performStatistics();
-
-    dataManager->printData();
+        char choice = UserInput::getChar();
+        switch (choice) {
+        case '1':
+            // Implement calculator functionality
+            SystemOutput::print("Calculator functionality not implemented yet.", SystemOutput::Color::Yellow);
+            break;
+        case '2':
+            // Implement show examples functionality
+            SystemOutput::print("Show examples functionality not implemented yet.", SystemOutput::Color::Yellow);
+            break;
+        case '3':
+            running = false;
+            break;
+        default:
+            SystemOutput::print("Invalid choice, please try again.", SystemOutput::Color::Red);
+            break;
+        }
+    }
 
     return 0;
 }

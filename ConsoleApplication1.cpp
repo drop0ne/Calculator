@@ -5,43 +5,8 @@
 #include <string>
 #include <vector>
 #include <numeric>
-#include <cmath>
-#include <functional>
-#include <memory>
-#include <random>
-#include <algorithm>
-
-// UserInput class to handle all user inputs
-class UserInput {
-public:
-    // Get a single character input from the user
-    static char getChar() {
-        return _getch();
-    }
-
-    // Get a string input from the user
-    static std::string getString() {
-        std::string input;
-        std::getline(std::cin, input);
-        return input;
-    }
-
-    // Get a double input from the user
-    static double getDouble() {
-        double input;
-        std::cin >> input;
-        return input;
-    }
-
-    // Get a vector of doubles from the user
-    static std::vector<double> getDoubleVector(int size) {
-        std::vector<double> vec(size);
-        for (int i = 0; i < size; ++i) {
-            std::cin >> vec[i];
-        }
-        return vec;
-    }
-};
+#include <stdexcept>  // For standard exceptions
+#include <limits>  // For numeric limits
 
 // SystemOutput class to manage printing to the console and setting text color
 class SystemOutput {
@@ -70,6 +35,7 @@ public:
         setColor(Color::Default);  // Reset to default color
     }
 
+    // Print a fancy message to the console with an optional color
     static void printFancy(const std::string& message, Color color = Color::Default) {
         setColor(color);
         std::cout << "=============================" << std::endl;
@@ -79,17 +45,61 @@ public:
     }
 };
 
+// UserInput class to handle all user inputs
+class UserInput {
+public:
+    // Get a single character input from the user
+    static char getChar() {
+        return _getch();
+    }
+
+    // Get a string input from the user
+    static std::string getString() {
+        std::string input;
+        std::getline(std::cin, input);
+        return input;
+    }
+
+    // Get a double input from the user with validation
+    static double getDouble() {
+        double input;
+        while (!(std::cin >> input)) {
+            std::cin.clear(); // clear the error flag
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // discard invalid input
+            SystemOutput::print("Invalid input. Please enter a valid number: ", SystemOutput::Color::Red);
+        }
+        return input;
+    }
+
+    // Get a vector of doubles from the user with validation
+    static std::vector<double> getDoubleVector(int size) {
+        std::vector<double> vec(size);
+        for (int i = 0; i < size; ++i) {
+            vec[i] = getDouble();
+        }
+        return vec;
+    }
+};
+
 // ArithmeticWorker class to perform arithmetic operations
 class ArithmeticWorker {
 public:
+    // Perform addition
     double add(double a, double b) { return a + b; }
+
+    // Perform subtraction
     double subtract(double a, double b) { return a - b; }
+
+    // Perform multiplication
     double multiply(double a, double b) { return a * b; }
+
+    // Perform division with validation for division by zero
     double divide(double a, double b) {
         if (b == 0) { throw std::invalid_argument("Division by zero"); }
         return a / b;
     }
 
+    // Perform the arithmetic operation based on user input
     void performArithmetic(char operation, double a, double b) {
         double result = 0;
         switch (operation) {
@@ -124,17 +134,16 @@ public:
 // LinearAlgebraWorker class to perform linear algebra operations
 class LinearAlgebraWorker {
 public:
+    // Calculate the dot product of two vectors
     double dotProduct(const std::vector<double>& v1, const std::vector<double>& v2) {
         if (v1.size() != v2.size()) {
             throw std::invalid_argument("Vectors must be of the same size");
         }
-        double result = 0;
-        for (size_t i = 0; i < v1.size(); ++i) {
-            result += v1[i] * v2[i];
-        }
+        double result = std::inner_product(v1.begin(), v1.end(), v2.begin(), 0.0);
         return result;
     }
 
+    // Handle the dot product operation with user inputs
     void performDotProduct() {
         SystemOutput::print("Enter the size of the vectors: ");
         int size;
@@ -159,10 +168,15 @@ public:
 // StatisticsWorker class to perform statistical operations
 class StatisticsWorker {
 public:
+    // Calculate the mean of a dataset
     double mean(const std::vector<double>& data) {
+        if (data.empty()) {
+            throw std::invalid_argument("Data set cannot be empty");
+        }
         return std::accumulate(data.begin(), data.end(), 0.0) / data.size();
     }
 
+    // Handle the mean calculation operation with user inputs
     void performMean() {
         SystemOutput::print("Enter the size of the data set: ");
         int size;
@@ -171,8 +185,13 @@ public:
         SystemOutput::print("Enter elements of the data set: ");
         std::vector<double> data = UserInput::getDoubleVector(size);
 
-        double result = mean(data);
-        SystemOutput::print("Mean Result: " + std::to_string(result), SystemOutput::Color::Cyan);
+        try {
+            double result = mean(data);
+            SystemOutput::print("Mean Result: " + std::to_string(result), SystemOutput::Color::Cyan);
+        }
+        catch (const std::invalid_argument& e) {
+            SystemOutput::print(e.what(), SystemOutput::Color::Red);
+        }
     }
 };
 
@@ -216,6 +235,7 @@ public:
         SystemOutput::print("6. Machine Learning", SystemOutput::Color::Default);
     }
 
+    // Display the options for arithmetic operations
     void displayArithmeticFunctions() {
         SystemOutput::print("  Basic Arithmetic Functions:", SystemOutput::Color::Default);
         SystemOutput::print("    1. Addition (a + b)", SystemOutput::Color::Default);
@@ -225,27 +245,32 @@ public:
         std::cout << "Choose an operation: ";
     }
 
+    // Display the options for linear algebra operations
     void displayLinearAlgebraFunctions() {
         SystemOutput::print("  Linear Algebra Functions:", SystemOutput::Color::Default);
         SystemOutput::print("    1. Vector Dot Product (v1 · v2)", SystemOutput::Color::Default);
     }
 
+    // Display the options for calculus operations
     void displayCalculusFunctions() {
         SystemOutput::print("  Calculus Functions:", SystemOutput::Color::Default);
         SystemOutput::print("    1. Differentiation (f'(x))", SystemOutput::Color::Default);
         SystemOutput::print("    2. Integration (∫f(x)dx)", SystemOutput::Color::Default);
     }
 
+    // Display the options for statistics operations
     void displayStatisticsFunctions() {
         SystemOutput::print("  Statistics Functions:", SystemOutput::Color::Default);
         SystemOutput::print("    1. Mean (average)", SystemOutput::Color::Default);
     }
 
+    // Display the options for probability operations
     void displayProbabilityFunctions() {
         SystemOutput::print("  Probability Functions:", SystemOutput::Color::Default);
         SystemOutput::print("    1. Random Sampling", SystemOutput::Color::Default);
     }
 
+    // Display the options for machine learning operations
     void displayMachineLearningFunctions() {
         SystemOutput::print("  Machine Learning Functions:", SystemOutput::Color::Default);
         SystemOutput::print("    1. ReLU (max(0, x))", SystemOutput::Color::Default);
@@ -253,6 +278,7 @@ public:
         SystemOutput::print("    3. Tanh (tanh(x))", SystemOutput::Color::Default);
     }
 
+    // Display the details for the chosen calculator function
     void displayCalculatorFunctionDetails(char choice) {
         clearScreen();
         switch (choice) {
@@ -286,6 +312,7 @@ public:
         }
     }
 
+    // Handle user input for arithmetic operations
     void handleArithmeticInput() {
         char operation = UserInput::getChar();
         std::cout << "Enter first number: ";
@@ -300,6 +327,7 @@ public:
         UserInput::getChar();
     }
 
+    // Handle user input for linear algebra operations
     void handleLinearAlgebraInput() {
         LinearAlgebraWorker linearAlgebraWorker;
         linearAlgebraWorker.performDotProduct();
@@ -308,6 +336,7 @@ public:
         UserInput::getChar();
     }
 
+    // Handle user input for calculus operations
     void handleCalculusInput() {
         SystemOutput::print("Calculus functionality not implemented yet.", SystemOutput::Color::Yellow);
 
@@ -315,6 +344,7 @@ public:
         UserInput::getChar();
     }
 
+    // Handle user input for statistics operations
     void handleStatisticsInput() {
         StatisticsWorker statisticsWorker;
         statisticsWorker.performMean();
@@ -323,6 +353,7 @@ public:
         UserInput::getChar();
     }
 
+    // Handle user input for probability operations
     void handleProbabilityInput() {
         SystemOutput::print("Probability functionality not implemented yet.", SystemOutput::Color::Yellow);
 
@@ -330,6 +361,7 @@ public:
         UserInput::getChar();
     }
 
+    // Handle user input for machine learning operations
     void handleMachineLearningInput() {
         SystemOutput::print("Machine Learning functionality not implemented yet.", SystemOutput::Color::Yellow);
 
